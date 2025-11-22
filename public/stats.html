@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Link Stats - TinyLink</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>Link Stats</h1>
+    <a href="/" class="back-link">&larr; Back to dashboard</a>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div id="stats-loading">Loading...</div>
+      <div id="stats-error" class="message error" style="display:none"></div>
+
+      <div id="stats-content" style="display:none">
+        <p><strong>Short URL:</strong> <a id="short-url" href="#" target="_blank"></a></p>
+        <p><strong>Code:</strong> <span id="code"></span></p>
+        <p><strong>Target URL:</strong> <a id="target-url" href="#" target="_blank"></a></p>
+        <p><strong>Total Clicks:</strong> <span id="total-clicks"></span></p>
+        <p><strong>Last Clicked:</strong> <span id="last-clicked"></span></p>
+        <p><strong>Created At:</strong> <span id="created-at"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>TinyLink</span>
+  </footer>
+
+  <script src="/stats.js"></script>
+</body>
+</html>
