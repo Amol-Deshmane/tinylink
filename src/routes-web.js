@@ -1,11 +1,16 @@
+// src/routes-web.js
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import pool from "./db.js";
 
 const router = express.Router();
+
+// Resolve __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Serve static HTML from /public
 const publicDir = path.join(__dirname, "..", "public");
 
 // Dashboard – "/"
@@ -24,13 +29,16 @@ router.get("/healthz", (req, res) => {
     ok: true,
     version: "1.0",
     uptime: process.uptime(),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
-// Redirect – "/:code" (IMPORTANT: after /api and /code routes)
+// Redirect – "/:code"
+// IMPORTANT: in server.js this router must be mounted
+// AFTER /api so that /api/... is not treated as a code.
 router.get("/:code", async (req, res) => {
   const { code } = req.params;
+
   try {
     const result = await pool.query(
       `UPDATE links

@@ -1,16 +1,26 @@
+// src/routes-api.js
 import express from "express";
 import pool from "./db.js";
 import { isValidCodeFormat, isValidUrl, generateRandomCode } from "./utils.js";
 
 const router = express.Router();
 
-// GET /api/links – list all links
+/**
+ * GET /api/links
+ * List all links (for dashboard)
+ */
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT code, target_url, total_clicks, last_clicked_at, created_at
-       FROM links ORDER BY created_at DESC`
+      `SELECT code,
+              target_url,
+              total_clicks,
+              last_clicked_at,
+              created_at
+       FROM links
+       ORDER BY created_at DESC`
     );
+
     res.json(result.rows);
   } catch (err) {
     console.error("GET /api/links error:", err);
@@ -18,18 +28,29 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/links/:code – stats for one link
+/**
+ * GET /api/links/:code
+ * Get stats for a single code
+ */
 router.get("/:code", async (req, res) => {
   const { code } = req.params;
+
   try {
     const result = await pool.query(
-      `SELECT code, target_url, total_clicks, last_clicked_at, created_at
-       FROM links WHERE code = $1`,
+      `SELECT code,
+              target_url,
+              total_clicks,
+              last_clicked_at,
+              created_at
+       FROM links
+       WHERE code = $1`,
       [code]
     );
+
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "NOT_FOUND" });
     }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error("GET /api/links/:code error:", err);
@@ -37,7 +58,13 @@ router.get("/:code", async (req, res) => {
   }
 });
 
-// POST /api/links – create link (409 if code exists)
+/**
+ * POST /api/links
+ * Body: { url, code? }
+ * - Validates URL and optional code
+ * - Generates code if missing
+ * - Ensures uniqueness
+ */
 router.post("/", async (req, res) => {
   let { url, code } = req.body || {};
 
@@ -50,22 +77,30 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // If no custom code given, generate until unique
+    // If no custom code: generate unique random code
     if (!code) {
       let unique = false;
       let attempt = 0;
+
       while (!unique && attempt < 5) {
         code = generateRandomCode(6);
-        const existing = await pool.query("SELECT 1 FROM links WHERE code=$1", [code]);
+        const existing = await pool.query(
+          "SELECT 1 FROM links WHERE code = $1",
+          [code]
+        );
         if (existing.rowCount === 0) unique = true;
         attempt++;
       }
+
       if (!unique) {
         return res.status(500).json({ error: "CODE_GENERATION_FAILED" });
       }
     } else {
-      // Custom code must be globally unique
-      const existing = await pool.query("SELECT 1 FROM links WHERE code=$1", [code]);
+      // Custom code: must be unique
+      const existing = await pool.query(
+        "SELECT 1 FROM links WHERE code = $1",
+        [code]
+      );
       if (existing.rowCount > 0) {
         return res.status(409).json({ error: "CODE_ALREADY_EXISTS" });
       }
@@ -74,7 +109,11 @@ router.post("/", async (req, res) => {
     const insert = await pool.query(
       `INSERT INTO links (code, target_url)
        VALUES ($1, $2)
-       RETURNING code, target_url, total_clicks, last_clicked_at, created_at`,
+       RETURNING code,
+                 target_url,
+                 total_clicks,
+                 last_clicked_at,
+                 created_at`,
       [code, url]
     );
 
@@ -85,14 +124,23 @@ router.post("/", async (req, res) => {
   }
 });
 
-// DELETE /api/links/:code – delete link
+/**
+ * DELETE /api/links/:code
+ * Delete a link by code
+ */
 router.delete("/:code", async (req, res) => {
   const { code } = req.params;
+
   try {
-    const result = await pool.query("DELETE FROM links WHERE code=$1", [code]);
+    const result = await pool.query(
+      "DELETE FROM links WHERE code = $1",
+      [code]
+    );
+
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "NOT_FOUND" });
     }
+
     res.status(204).send();
   } catch (err) {
     console.error("DELETE /api/links/:code error:", err);
