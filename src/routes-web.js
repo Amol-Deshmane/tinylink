@@ -33,8 +33,6 @@ router.get("/healthz", (req, res) => {
   });
 });
 
-// Redirect – "/:code"
-// IMPORTANT: in server.js this router must be mounted
 // AFTER /api so that /api/... is not treated as a code.
 router.get("/:code", async (req, res) => {
   const { code } = req.params;

@@ -5,9 +5,8 @@ import { isValidCodeFormat, isValidUrl, generateRandomCode } from "./utils.js";
 
 const router = express.Router();
 
-/**
- * GET /api/links
- * List all links (for dashboard)
+/*
+  List all links (for dashboard)
  */
 router.get("/", async (req, res) => {
   try {
@@ -28,9 +27,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**
- * GET /api/links/:code
- * Get stats for a single code
+/*
+  Get stats for a single code
  */
 router.get("/:code", async (req, res) => {
   const { code } = req.params;
@@ -58,12 +56,8 @@ router.get("/:code", async (req, res) => {
   }
 });
 
-/**
- * POST /api/links
- * Body: { url, code? }
- * - Validates URL and optional code
- * - Generates code if missing
- * - Ensures uniqueness
+/*
+ POST /api/links
  */
 router.post("/", async (req, res) => {
   let { url, code } = req.body || {};
@@ -77,7 +71,6 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // If no custom code: generate unique random code
     if (!code) {
       let unique = false;
       let attempt = 0;
@@ -124,9 +117,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-/**
- * DELETE /api/links/:code
- * Delete a link by code
+/*
+  Delete a link by code
  */
 router.delete("/:code", async (req, res) => {
   const { code } = req.params;
